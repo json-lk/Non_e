@@ -2,7 +2,7 @@ const URL = "https://non-e.onrender.com";
 const socket = io("https://non-e.onrender.com", {
     withCredentials: true,
     transports: ["polling", "websocket"] // Try polling first, then upgrade to websocket
-});const socket = io(URL, { withCredentials: true, transports: ["websocket", "polling"] });
+});
 
 // --- SELECTORS ---
 const createChatBtn = document.getElementById('create-chat');
