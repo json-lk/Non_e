@@ -73,7 +73,7 @@ loginForm.addEventListener('submit', (e) => {
 socket.on('signupResponse', (response) => {
     if (response.success) {
         localStorage.setItem('currentUser', JSON.stringify(response.user));
-        window.location.href = 'mainpage.html'; // Ensure this matches your file name
+        window.location.href = 'This page.html'; // Ensure this matches your file name
     } else {
         alert("Signup failed: " + response.message);
     }
@@ -82,7 +82,7 @@ socket.on('signupResponse', (response) => {
 socket.on('loginResponse', (res) => {
     if (res.success) {
         localStorage.setItem('currentUser', JSON.stringify(res.user));
-        window.location.href = 'mainpage.html'; 
+        window.location.href = 'This page.html'; 
     } else {
         alert(res.message);
     }
