@@ -46,7 +46,7 @@ app.use(express.static(path.join(__dirname, 'Public')));
 const io = socketIo(server, {
     cors: {
         // MUST match your Vercel URL exactly!
-        origin: "https://none-mauve.vercel.app", 
+        origin: "https://privateno.netlify.app", 
         methods: ["GET", "POST"],
         credentials: true
     },
