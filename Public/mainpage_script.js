@@ -24,21 +24,6 @@ toggleButton.addEventListener('click', () => {
 // --- AUTH & PROFILE SUBMISSIONS ---
 
 // Login
-document.getElementById('logins').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = e.target.querySelector('input[type="email"]').value;
-    const password = e.target.querySelector('input[type="password"]').value;
-    socket.emit('login', { email, password });
-});
-
-// Signup
-document.getElementById('signups').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const name = e.target.querySelector('input[type="text"]').value;
-    const email = e.target.querySelector('input[type="email"]').value;
-    const password = e.target.querySelectorAll('input[type="password"]')[0].value;
-    socket.emit('signup', { name, email, password });
-});
 
 // Update Profile (Supabase logic)
 document.getElementById('edit-profile-form').addEventListener('submit', (e) => {
