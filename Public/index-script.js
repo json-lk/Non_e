@@ -1,8 +1,8 @@
 // 1. Initialize Socket
 const URL = "https://non-e.onrender.com"; 
-const socket = io(URL, {
+const socket = io("https://non-e.onrender.com", {
     withCredentials: true,
-    transports: ["websocket", "polling"]
+    transports: ["polling", "websocket"] // Try polling first, then upgrade to websocket
 });
 
 // --- SELECTORS ---
