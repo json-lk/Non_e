@@ -45,10 +45,12 @@ app.use(express.static(path.join(__dirname, 'Public')));
 
 const io = socketIo(server, {
     cors: {
-        origin: "https://none-mauve.vercel.app",
+        // MUST match your Vercel URL exactly!
+        origin: "https://none-mauve.vercel.app", 
         methods: ["GET", "POST"],
         credentials: true
-    }
+    },
+    transports: ['websocket', 'polling'] // Add this to force compatibility
 });
 
 io.use(sharedsession(sessionMiddleware, { autoSave: true }));
