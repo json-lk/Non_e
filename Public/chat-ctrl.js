@@ -1,8 +1,26 @@
-const URL = "https://non-e.onrender.com"; 
 const socket = io("https://non-e.onrender.com", {
-    withCredentials: true,
-    transports: ["polling", "websocket"] // Try polling first, then upgrade to websocket
+    withCredentials: true, // THIS IS CRITICAL
+    transports: ["polling","websocket"]
+    rememberUpgrade: true
 });
+
+async function establishSession() {
+    try {
+        // This "wakes up" the Render session and gets the cookie
+        await fetch("https://non-e.onrender.com/", { 
+            mode: 'cors',
+            credentials: 'include' // CRITICAL: Tell fetch to receive cookies
+        });
+        console.log("Session link established");
+        
+        // Only after fetch is successful, tell the server to refresh rooms
+        socket.emit('getRooms'); 
+    } catch (e) {
+        console.error("Could not reach server");
+    }
+}
+
+establishSession();
 
 // --- SELECTORS ---
 const createChatBtn = document.getElementById('create-chat');
@@ -41,10 +59,12 @@ closeCreateBtn.addEventListener('click', () => createChatModal.classList.add('hi
 // Create Room Action
 createChatForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    const nameInput = document.getElementById('chat-name').value.trim();
+    if (!nameInput) return alert("Room name is required");
+
     const roomData = {
-        name: document.getElementById('chat-name').value,
+        name: nameInput,
         password: document.getElementById('chat-password').value,
-        // Supabase uses text/uuid for IDs; default to random string if empty
         id: document.getElementById('chat-id').value || Math.random().toString(36).substring(7)
     };
     socket.emit('createRoom', roomData); 
@@ -55,7 +75,7 @@ joinChatForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const data = {
         name: joinChatForm.querySelector('#chat-name').value,
-        password: joinChatForm.querySelector('#chat-password').value
+        password: joinChatForm.querySelector('#chat-password').value // Fixed key name to match server
     };
     socket.emit('verify-room', data);
 });
@@ -63,14 +83,13 @@ joinChatForm.addEventListener('submit', (e) => {
 chatroomExitBtn.addEventListener('click', () => {
     chatroomUI.style.display = 'none';
     currentRoom = null;
-    currentRoomId = null;
 });
 
 // Delete Room Action
 chatroomSettingsBtn.addEventListener('click', () => {
     if (!currentRoomId) return;
-    if (confirm(`Are you sure you want to delete "${currentRoom}"? This will erase all history in Supabase.`)) {
-        socket.emit('deleteRoom', { roomId: currentRoomId });
+    if (confirm(`Are you sure you want to delete "${currentRoom}"?`)) {
+        socket.emit('deleteRoom', { roomId: currentRoomId }); // Send as object to match server listener
     }
 });
 
@@ -78,27 +97,27 @@ chatroomSettingsBtn.addEventListener('click', () => {
 
 sendmessage.addEventListener('submit', (e) => {
     e.preventDefault(); 
-    const user = JSON.parse(localStorage.getItem('currentUser'));
-    if (!user) {
-        alert("Session expired. Please log in.");
-        return authModal.classList.remove('hidden'); // Show login modal
-    }
-    if (!messageInput.value.trim() || !currentRoom) return;
+    const msgText = messageInput.value.trim();
+
+    if (!msgText) return;
+    if (!currentRoom) return alert("Please select a room first!");
 
     socket.emit('newMessage', {
         roomName: currentRoom,
-        message: messageInput.value
+        message: msgText
     });
     messageInput.value = '';
-});// --- FUNCTIONS ---
+});
+
+// --- FUNCTIONS ---
 
 function displaySingleMessage(data) {
-    const user = JSON.parse(localStorage.getItem('currentUser'));
-    // Supabase returns 'sender' and 'message' columns
-    const isMe = data.sender === user?.name;
+    // Check against the session user, fallback to localStorage if session hasn't synced yet
+    const activeUserName = currentUser ? currentUser.name : JSON.parse(localStorage.getItem('currentUser'))?.name;
+    const isMe = data.sender === activeUserName; 
+    
     const msgDiv = document.createElement('div');
     msgDiv.classList.add('message', isMe ? 'my-message' : 'other-message');
-    
     msgDiv.innerHTML = `
         <div>
             <div class="you" style="font-weight:bold">${isMe ? 'You' : data.sender}</div>
@@ -109,7 +128,10 @@ function displaySingleMessage(data) {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
+let currentUserName = null; // Global variable to store current user's name
+
 function updateRoomSidebar(room) {
+    // Prevent duplicates in the UI
     if (document.querySelector(`[data-id="${room.id}"]`)) return;
 
     const btn = document.createElement('button');
@@ -126,31 +148,29 @@ function openChatRoom(room) {
     
     document.querySelector('.chatroom .header .logo').textContent = room.name;
     chatroomUI.style.display = 'flex';
-    messagesContainer.innerHTML = ''; 
+    messagesContainer.innerHTML = ''; // Clear for history
     socket.emit('joinRoom', room.name);
 
     const user = JSON.parse(localStorage.getItem('currentUser'));
-    // Show delete button only if owner email matches
+    // Show delete button only if you are the owner (MongoDB email check)
     chatroomSettingsBtn.style.display = (user && room.owner === user.email) ? 'block' : 'none';
 }
 
 // --- SOCKET LISTENERS ---
-// On load, confirm session with server
-socket.on('sessionRestore', (data) => {
-    if (data.user) {
-        localStorage.setItem('currentUser', JSON.stringify(data.user));
-        // Refresh room list now that we are confirmed logged in
-        socket.emit('getRooms'); 
-    } else {
-        // Only redirect if they are trying to access protected features
-        console.log("Not logged in.");
-    }
+
+socket.on('errorMsg', (msg) => {
+    alert(msg); 
+    console.error("Server Error:", err);
+    alert(err);
 });
 
+socket.on('sessionRestore', (data) => { 
+    currentUserName = data.user.name;
+});
 
 socket.on('initRooms', (rooms) => {
     displayBox.innerHTML = ''; 
-    if (rooms) rooms.forEach(updateRoomSidebar);
+    rooms.forEach(updateRoomSidebar);
 });
 
 socket.on('room-created-success', (newRoom) => {
@@ -162,15 +182,11 @@ socket.on('room-created-success', (newRoom) => {
 
 socket.on('chatHistory', (history) => {
     messagesContainer.innerHTML = '';
-    if (history) history.forEach(displaySingleMessage);
+    history.forEach(displaySingleMessage);
 });
 
 socket.on('receiveMessage', (data) => {
-    // Only display if the message belongs to the room currently open
-    // Backend sends room_name (snake_case) from Supabase
-    if (data.room_name === currentRoom) {
-        displaySingleMessage(data);
-    }
+    displaySingleMessage(data);
 });
 
 socket.on('room-access-result', (response) => {
@@ -189,7 +205,6 @@ socket.on('roomDeleted', (roomId) => {
         chatroomUI.style.display = 'none';
         currentRoomId = null;
         currentRoom = null;
-        alert("This room has been deleted by the owner.");
     }
     const btn = document.querySelector(`[data-id="${roomId}"]`);
     if (btn) btn.remove();
@@ -199,5 +214,3 @@ socket.on('logoutConfirm', () => {
     localStorage.removeItem('currentUser');
     window.location.href = 'index.html';
 });
-
-socket.on('errorMsg', (msg) => alert(msg));
