@@ -1,5 +1,7 @@
-const socket = io("https://non-e.onrender.com", {
-    withCredentials: true, // THIS IS CRITICAL
+// 1. Initialize Socket correctly for Cross-Origin
+const URL = "https://non-e.onrender.com"; 
+const socket = io(URL, {
+    withCredentials: true,
     transports: ["websocket", "polling"]
 });
 
