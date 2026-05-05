@@ -15,8 +15,6 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-
-app.set('trust proxy', 1); 
 // 1. Database Connection
 const connectDB = async () => {
     try {
@@ -53,11 +51,15 @@ const Message = mongoose.model('Message', new mongoose.Schema({
 // 3. Socket & Session Setup
 const io = socketIo(server, {
     cors: {
-        origin: "https://privateno.netlify.app",
+        origin: "https://none-mauve.vercel.app",
         methods: ["GET", "POST"],
         credentials: true
     }
 });
+
+app.set('trust proxy', 1); 
+
+app.set('trust proxy', 1); // Required for Render
 
 const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET || 'secret-chat-key',
