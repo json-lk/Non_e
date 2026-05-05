@@ -1,8 +1,8 @@
 // 1. Initialize Socket
 const URL = "https://non-e.onrender.com"; 
-const socket = io("https://non-e.onrender.com", {
+const socket = io(URL, {
     withCredentials: true,
-    transports: ["polling", "websocket"] // Try polling first, then upgrade to websocket
+    transports: ["websocket", "polling"]
 });
 
 // --- SELECTORS ---
@@ -68,23 +68,7 @@ loginForm.addEventListener('submit', (e) => {
 });
 
 // --- SOCKET RESPONSES (Listeners kept outside to prevent memory leaks) ---
-// Ask the server the moment we connect
-socket.on('connect', () => {
-    socket.emit('checkAuthStatus');
-});
 
-socket.on('authStatus', (data) => {
-    if (data.loggedIn) {
-        console.log("User is authenticated:", data.user.name);
-        // Update your UI: Hide login buttons, show account icon
-        document.getElementById('login-btn').style.display = 'none';
-        document.getElementById('account-info').textContent = data.user.name;
-    } else {
-        console.log("User is not logged in.");
-        // Optional: Redirect to login page if they are on a protected page
-        // window.location.href = 'index.html';
-    }
-});
 // Handle Signup Response
 socket.on('signupResponse', (response) => {
     if (response.success) {
