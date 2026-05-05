@@ -54,7 +54,7 @@ const Message = mongoose.model('Message', new mongoose.Schema({
 // 3. Socket & Session Setup
 const io = socketIo(server, {
     cors: {
-        origin: "https://none-mauve.vercel.app",
+        origin: "https://privateno.netlify.app/",
         methods: ["GET", "POST"],
         credentials: true
     }
