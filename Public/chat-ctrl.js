@@ -1,5 +1,7 @@
-const socket = io("https://non-e.onrender.com", {
-    withCredentials: true, // THIS IS CRITICAL
+// 1. Initialize Socket correctly for Cross-Origin
+const URL = "https://non-e.onrender.com"; 
+const socket = io(URL, {
+    withCredentials: true,
     transports: ["websocket", "polling"]
 });
 
@@ -40,11 +42,8 @@ closeCreateBtn.addEventListener('click', () => createChatModal.classList.add('hi
 // Create Room Action
 createChatForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const nameInput = document.getElementById('chat-name').value.trim();
-    if (!nameInput) return alert("Room name is required");
-
     const roomData = {
-        name: nameInput,
+        name: document.getElementById('chat-name').value,
         password: document.getElementById('chat-password').value,
         id: document.getElementById('chat-id').value || Math.random().toString(36).substring(7)
     };
@@ -78,14 +77,13 @@ chatroomSettingsBtn.addEventListener('click', () => {
 
 sendmessage.addEventListener('submit', (e) => {
     e.preventDefault(); 
-    const msgText = messageInput.value.trim();
-
-    if (!msgText) return;
-    if (!currentRoom) return alert("Please select a room first!");
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    if (!user) return alert("Please log in!");
+    if (!messageInput.value.trim() || !currentRoom) return;
 
     socket.emit('newMessage', {
         roomName: currentRoom,
-        message: msgText
+        message: messageInput.value
     });
     messageInput.value = '';
 });
@@ -93,10 +91,8 @@ sendmessage.addEventListener('submit', (e) => {
 // --- FUNCTIONS ---
 
 function displaySingleMessage(data) {
-    // Check against the session user, fallback to localStorage if session hasn't synced yet
-    const activeUserName = currentUser ? currentUser.name : JSON.parse(localStorage.getItem('currentUser'))?.name;
-    const isMe = data.sender === activeUserName; 
-    
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    const isMe = data.sender === user?.name;
     const msgDiv = document.createElement('div');
     msgDiv.classList.add('message', isMe ? 'my-message' : 'other-message');
     msgDiv.innerHTML = `
@@ -108,8 +104,6 @@ function displaySingleMessage(data) {
     messagesContainer.appendChild(msgDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
-
-let currentUserName = null; // Global variable to store current user's name
 
 function updateRoomSidebar(room) {
     // Prevent duplicates in the UI
@@ -138,16 +132,6 @@ function openChatRoom(room) {
 }
 
 // --- SOCKET LISTENERS ---
-
-socket.on('errorMsg', (msg) => {
-    alert(msg); 
-    console.error("Server Error:", err);
-    alert(err);
-});
-
-socket.on('sessionRestore', (data) => { 
-    currentUserName = data.user.name;
-});
 
 socket.on('initRooms', (rooms) => {
     displayBox.innerHTML = ''; 
