@@ -545,6 +545,9 @@ body.dark-mode .header button:hover {
     background: #ebfae677;
     overflow-y: auto; /* Enable vertical scrolling */
     padding: 15px;
+    background-image: url('/Images/doddle.jpg');
+    background-size: cover;
+    mix-blend-mode: lighten;
 }
 
 .chatroom .typebox {
