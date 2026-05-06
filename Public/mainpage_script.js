@@ -1,11 +1,8 @@
-// 1. Initialize Socket correctly for Cross-Origin
 const URL = "https://non-e.onrender.com"; 
 const socket = io(URL, {
     withCredentials: true,
     transports: ["websocket", "polling"]
 });
-
-// --- SELECTORS ---
 const toggleButton = document.getElementById('theme-toggle');
 const authModal = document.getElementById('auth');
 const accountButton = document.querySelector('.account-button');
@@ -13,7 +10,7 @@ const accountDropdown = document.getElementById('account-dropdown');
 const editProfileModal = document.getElementById('edit-profile-modal');
 const switchFormButtons = document.querySelectorAll('.switch-process');
 const deleteAccountButton = document.getElementById('delusr');
-// --- THEME LOGIC ---
+
 let isDarkMode = false;
 toggleButton.addEventListener('click', () => {
     isDarkMode = !isDarkMode;
@@ -21,9 +18,6 @@ toggleButton.addEventListener('click', () => {
     toggleButton.innerHTML = isDarkMode ? '🌞' : '🌙';
 });
 
-// --- AUTH SUBMISSIONS ---
-
-// Login
 document.getElementById('logins').addEventListener('submit', (e) => {
     e.preventDefault();
     const email = e.target.querySelector('input[type="email"]').value;
@@ -31,7 +25,6 @@ document.getElementById('logins').addEventListener('submit', (e) => {
     socket.emit('login', { email, password });
 });
 
-// Signup
 document.getElementById('signups').addEventListener('submit', (e) => {
     e.preventDefault();
     const name = e.target.querySelector('input[type="text"]').value;
@@ -40,7 +33,6 @@ document.getElementById('signups').addEventListener('submit', (e) => {
     socket.emit('signup', { name, email, password });
 });
 
-// Update Profile
 document.getElementById('edit-profile-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
@@ -64,12 +56,9 @@ deleteAccountButton.addEventListener('click', (e) => {
     }
 
     if (confirm("⚠️ Permanent MongoDB Wipe: Are you sure? This cannot be undone.")) {
-        // Send the unique identifier (email or ID) to the server
         socket.emit('deleteAccount', { email: user.email });
     }
 });
-
-// --- UI EVENT LISTENERS ---
 
 accountButton.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -94,12 +83,10 @@ switchFormButtons.forEach(button => {
     });
 });
 
-// Close all modals
 document.querySelectorAll('.close-but').forEach(btn => {
     btn.addEventListener('click', () => {
         authModal.classList.add('hidden');
         editProfileModal.classList.add('hidden');
-        // Close room modals if they exist on this page
         const roomModals = ['create-chatroom', 'join-chatroom'];
         roomModals.forEach(id => {
             const el = document.getElementById(id);
@@ -124,7 +111,6 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// --- UI HELPERS ---
 function updateAccountButton() {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     if (currentUser && currentUser.name) {
@@ -138,12 +124,8 @@ function updateAccountButton() {
     }
 }
 
-// Initial UI Check
 updateAccountButton();
 
-// --- SOCKET LISTENERS (MongoDB Sync) ---
-
-// Automatically logged in via MongoDB Session
 socket.on('sessionRestore', (data) => {
     if (data.user) {
         localStorage.setItem('currentUser', JSON.stringify(data.user));
@@ -190,11 +172,8 @@ socket.on('updateProfileResponse', (res) => {
 
 socket.on('deleteResponse', (res) => {
     if (res.success) {
-        // Clear local data
         localStorage.removeItem('currentUser');
         alert("Account permanently deleted from database.");
-        
-        // Redirect or Refresh to reset UI
         window.location.reload(); 
     } else {
         alert("Error deleting account: " + res.message);
