@@ -214,29 +214,28 @@ io.on('connection', (socket) => {
     });
 
     socket.on('updateProfileRequest', async (data) => {
-    try {
-        const { userId, newName } = data;
+        try {
+            const { userId, newName } = data;
+            // 1. Update the document in MongoDB Atlas
+            const updatedUser = await db.collection('users').findOneAndUpdate(
+                { _id: userId },          
+                { $set: { name: newName } },
+                { returnDocument: 'after' } // Returns the updated object
+            );
 
-        // 1. Update the document in MongoDB Atlas
-        const updatedUser = await db.collection('users').findOneAndUpdate(
-            { _id: userId }, 
-            { $set: { name: newName } },
-            { returnDocument: 'after' } // Returns the updated object
-        );
-
-        if (updatedUser) {
-            // 2. Send success back to the client
-            socket.emit('updateProfileResponse', {
-                success: true,
-                user: updatedUser
-            });
-        } else {
-            socket.emit('updateProfileResponse', { success: false, message: "User not found" });
+            if (updatedUser) {
+                // 2. Send success back to the client
+                socket.emit('updateProfileResponse', {
+                    success: true,
+                    user: updatedUser
+                });
+            } else {
+                socket.emit('updateProfileResponse', { success: false, message: "User not found" });
+            }
+        } catch (error) {
+            socket.emit('updateProfileResponse', { success: false, message: error.message });
         }
-    } catch (error) {
-        socket.emit('updateProfileResponse', { success: false, message: error.message });
-    }
-});
+    });
     
 });
 
