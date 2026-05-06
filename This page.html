@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konnect: What we call the main page ...🤔🤔🤔🤔</title>
+    <link rel="stylesheet" href="mainpage_css.css">
+</head>
+<body>
+    <div class="header">
+        <div class="site-name">
+            <h1>Konnect</h1>
+        </div>
+        <div class="accbut">
+            <button id="theme-toggle" class="toggle-mode" type="button" aria-label="Switch to dark mode">🌙</button>
+            <div class="account-menu-container">
+                <button class="button account-button" type="button" aria-label="Account">👤</button>
+                <div id="account-dropdown" class="account-dropdown hidden">
+                    <button class="dropdown-item" id="edit-profile-btn"> Edit Profile</button>
+                    <button class="dropdown-item" id="logout-btn"> Logout</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="auth" class="auth hidden">
+            <div class="auth-content">
+                <button class="close-but">&times;</button>
+                
+                
+                <div id="login" class="authin active">
+                    <h2>Log In</h2>
+                    <form id="logins">
+                        <input type="email" placeholder="Email" required>
+                        <input type="password" placeholder="Password" required>
+                        <button type="submit">Log In</button>
+                    </form>
+                    <p>Don't have an account? <button type="button" class="switch-process" data-target="signup">Sign Up</button></p>
+                </div>
+                
+                
+                <div id="signup" class="authin">
+                    <h2>Sign Up</h2>
+                    <form id="signups">
+                        <input type="text" placeholder="Full Name" required>
+                        <input type="email" placeholder="Email" required>
+                        <input type="password" placeholder="Password" required>
+                        <input type="password" placeholder="Confirm Password" required>
+                        <button type="submit">Sign Up</button>
+                    </form>
+                    <p>Already have an account? <button type="button" class="switch-process" data-target="login">Log In</button></p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="edit-profile-modal" class="auth hidden">
+            <div class="auth-content" id="edit-profile-content">
+                <button class="close-but">&times;</button>
+                <div id="edit-profile-form-container" class="authin active">
+                    <h2>Edit Profile</h2>
+                    <form id="edit-profile-form">
+                        <input type="text" id="edit-name" placeholder="Full Name" required>
+                        <input type="email" id="edit-email" placeholder="Email" required>
+                        <input type="password" id="edit-password" placeholder="New Password (leave empty to keep current)">
+                        <button type="submit">Save Changes</button>
+                        <button type="submit" id="delusr" >Delete account</button>
+                    </form>
+                </div>
+            </div>
+        </div>        
+    </div>
+
+    <div class="layout">
+        <navbar class="navbar">
+            <nav class="navi-buttons">
+                <button class="buttons" type="button" aria-label="Hsome" id="show-chats">💬</button>
+                <button class="buttons" type="button" aria-label="Create" id="create-chat">➕</button>
+                <button class="buttons" type="button" aria-label="Settings" id="chat-set">⚙️</button>
+                <button class="buttons" type="button" aria-label="Help" id="help">❔</button>
+            </nav>
+            
+            <content class="content">
+                <div class="dislpay" id="display-box">
+                    <div class="chat" id="room">
+
+                    </div>
+
+                </div>
+            </content>
+            <div class="join" id="join">
+                <button class="buttons" type="button" id="join-button" >Join room</button>
+            </div>
+        </navbar>
+
+       <mma class="chatroom"> 
+            <div class="header">
+                <div class="logo"></div>
+                <div class="controls">
+                    <button id="delroom" type="button" aria-label="Settings">🗑</button>
+                    <button id="exit" type="button" aria-label="Minimize"><strong>_</strong></button>     
+                </div>    
+            </div>
+
+            <div class="messages">
+                <div class="message my-message">
+                    <div>
+                    
+                    </div>
+                </div>
+
+                <div class="update">
+                    
+                </div>
+
+                <div class="message other-message">
+                    <div>
+                    
+                    </div>
+                </div>
+            </div>
+            <form class="typebox" id="message-form">
+                <input type="text" id="messages-input">
+                <button id="send-message"><b>></b></button> 
+            </form>
+        </mma>
+    </div>
+    
+    <div id="create-chatroom" class="auth hidden">
+        <div class="auth-content" id="create-chat-content">
+            <div id="craete-form-container" class="authin active">
+                <button class="close-but" id='close-create'>&times;</button>
+                <h2>Create Chat Room</h2>
+                <form id="create-form">
+                    <input type="text" id="chat-name" placeholder="Chat Room Name" required>
+                    <input type="password" id="chat-password" placeholder="Password" required>
+                    <input type="text" id="chat-id" placeholder="ID Number" required>
+                    <button type="submit">Create Chat Room</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    
+    <div id="join-chatroom" class="auth hidden">
+        <div class="auth-content" id="join-chat-content">
+            <div id="join-form-container" class="authin active">
+                <button class="close-but" id="close-join">&times;</button>
+                <h2>Join Chat Room</h2>
+                <form id="join-form">
+                    <input type="text" id="chat-name" placeholder="Chat Room Name" required>
+                    <input type="password" id="chat-password" placeholder="Password" required>
+                    <button type="submit">Join Chat Room</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script type="module" src="/mainpage_script.js"></script>
+    <script type="module" src="/chat-ctrl.js"></script>
+    
+</body>
+</html>
