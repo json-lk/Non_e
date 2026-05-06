@@ -1,11 +1,9 @@
-// 1. Initialize Socket correctly for Cross-Origin (Vercel -> Render)
 const URL = "https://non-e.onrender.com"; 
 const socket = io(URL, {
     withCredentials: true,
     transports: ["websocket", "polling"]
 });
 
-// Initialize socket connection with Vercel-compatible settings
 const signupBtn = document.getElementById('signup-btn');
 const loginBtn = document.getElementById('login-btn');
 const authModal = document.getElementById('auth');
@@ -47,13 +45,8 @@ switchForms.forEach((btn) => {
   });
 });
 
-// Handle signup form submission
-// Keep the listener outside the submit block to avoid memory leaks
 socket.on('signupResponse', (response) => {
     if (response.success) {
-        // --- THE "AUTO-LOGIN" MAGIC ---
-        // We save the user data returned from the server into localStorage
-        // This makes the user 'persist' across page refreshes and redirects
         const userData = {
             name: response.user.name,
             email: response.user.email
@@ -62,8 +55,7 @@ socket.on('signupResponse', (response) => {
         localStorage.setItem('currentUser', JSON.stringify(userData));
 
         alert("Welcome, " + response.user.name + "! Logging you in...");
-        
-        // Redirect to the chat page
+
         window.location.href = 'This page.html'; 
     } else {
         alert("Signup failed: " + response.message);
@@ -79,7 +71,6 @@ signupForm.addEventListener('submit', (e) => {
     socket.emit('signup', { name, email, password });
 });
 
-// Handle login form submission
 loginForm.addEventListener('submit', (e) => {
   e.preventDefault();
 
@@ -89,9 +80,7 @@ loginForm.addEventListener('submit', (e) => {
   socket.emit('login', { email, password });
   socket.on('loginResponse', (res) => {
     if (res.success) {
-        // SAVE HERE first before moving pages
         localStorage.setItem('currentUser', JSON.stringify(res.user));
-        // Then move to the chat page
         window.location.href = 'This page.html'; 
     } else {
         alert(res.message);
