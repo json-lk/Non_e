@@ -55,12 +55,6 @@ const Message = mongoose.model('Message', new mongoose.Schema({
     }
 }));
 
-const Message = mongoose.model('Message', new mongoose.Schema({
-    roomName: String,
-    message: String,
-    sender: String,
-    timestamp: { type: Date, default: Date.now }
-}));
 
 // 3. Socket & Session Setup
 const io = socketIo(server, {
