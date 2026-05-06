@@ -178,6 +178,16 @@ io.on('connection', (socket) => {
         console.log(`${userName} joined room: ${roomName}`);
     });
 
+    socket.on('disconnecting', () => {
+        // Rooms the user was in before disconnecting
+        socket.rooms.forEach(room => {
+            socket.to(room).emit('notification', {
+                message: "A user has left the chat.",
+                type: 'leave'
+            });
+        });
+    });
+
     socket.on('newMessage', async (data) => {
         if (!session?.user || !data.roomName) return;
         const newMessage = await Message.create({
