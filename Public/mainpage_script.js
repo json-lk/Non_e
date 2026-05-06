@@ -12,7 +12,7 @@ const accountButton = document.querySelector('.account-button');
 const accountDropdown = document.getElementById('account-dropdown');
 const editProfileModal = document.getElementById('edit-profile-modal');
 const switchFormButtons = document.querySelectorAll('.switch-process');
-
+const deleteAccountButton = document.getElementById('delusr');
 // --- THEME LOGIC ---
 let isDarkMode = false;
 toggleButton.addEventListener('click', () => {
@@ -54,12 +54,18 @@ document.getElementById('edit-profile-form').addEventListener('submit', (e) => {
     });
 });
 
-// Delete Account (Permanent MongoDB Wipe)
-document.getElementById('delusr').addEventListener('click', (e) => {
+deleteAccountButton.addEventListener('click', (e) => {
     e.preventDefault();
-    if (confirm("⚠️ Delete account permanently? This cannot be undone.")) {
-        const user = JSON.parse(localStorage.getItem('currentUser'));
-        socket.emit('deleteAccount', user.email);
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    
+    if (!user) {
+        alert("You must be logged in to delete an account.");
+        return;
+    }
+
+    if (confirm("⚠️ Permanent MongoDB Wipe: Are you sure? This cannot be undone.")) {
+        // Send the unique identifier (email or ID) to the server
+        socket.emit('deleteAccount', { email: user.email });
     }
 });
 
@@ -184,9 +190,14 @@ socket.on('updateProfileResponse', (res) => {
 
 socket.on('deleteResponse', (res) => {
     if (res.success) {
+        // Clear local data
         localStorage.removeItem('currentUser');
-        alert("Account deleted.");
-        location.reload();
+        alert("Account permanently deleted from database.");
+        
+        // Redirect or Refresh to reset UI
+        window.location.reload(); 
+    } else {
+        alert("Error deleting account: " + res.message);
     }
 });
 
