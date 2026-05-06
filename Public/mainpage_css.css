@@ -376,27 +376,20 @@ body.dark-mode .dropdown-item:active {
 }
 
 .chatroom {
-    flex: 1; /* This makes it take up all remaining horizontal space */
-    display: flex; /* Necessary to align messages and typebox */
+    flex: 1; 
+    display: flex; 
     flex-direction: column;
     background: rgba(222, 235, 243, 0.5);
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(47, 143, 76, 0.13);
-    height: 98%; /* Fill the .layout container */
-    width: auto;   /* Remove the 97rem */
-    max-width: none; /* Remove the 73% limit */
-    overflow: hidden; /* Keep children contained */
+    height: 98%; 
+    width: auto;   
+    max-width: none; 
+    overflow: hidden; 
     position: relative;
     top: 2%;
 }
 
-.system-notification {
-    text-align: center;
-    font-size: 0.85rem;
-    color: #64748b; /* Slate gray */
-    margin: 10px 0;
-    font-style: italic;
-}
 
 .chatroom .header{
     display: flex;
@@ -554,9 +547,9 @@ body.dark-mode .header button:hover {
 .chatroom .typebox {
     display: flex;
     width: 100%;
-    height: 60px; /* Fixed height for input area */
+    height: 60px; 
     padding: 10px;
-    background: #ffffff; /* Or match your theme */
+    background: #ffffff; 
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
 }
