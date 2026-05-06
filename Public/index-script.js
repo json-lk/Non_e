@@ -13,17 +13,25 @@ const signupForm = document.getElementById('signups');
 const switchForms = document.querySelectorAll('.switch-process');
 
 signupBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-  authModal.classList.remove('hidden');
-  loginForm.classList.remove('hidden');
-  signupForm.classList.add('active');
+    e.preventDefault();
+    authModal.classList.remove('hidden'); 
+    
+    loginForm.classList.remove('active');
+    loginForm.classList.add('hidden');
+    
+    signupForm.classList.add('active');
+    signupForm.classList.remove('hidden');
 });
 
 loginBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-  authModal.classList.remove('hidden');
-  loginForm.classList.add('active');
-  signupForm.classList.remove('active');
+    e.preventDefault();
+    authModal.classList.remove('hidden');
+    
+    signupForm.classList.remove('active');
+    signupForm.classList.add('hidden');
+    
+    loginForm.classList.add('active');
+    loginForm.classList.remove('hidden');
 });
 
 closeBut.addEventListener('click', () => {
