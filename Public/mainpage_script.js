@@ -3,6 +3,7 @@ const socket = io(URL, {
     withCredentials: true,
     transports: ["websocket", "polling"]
 });
+
 const toggleButton = document.getElementById('theme-toggle');
 const authModal = document.getElementById('auth');
 const accountButton = document.querySelector('.account-button');
@@ -126,6 +127,7 @@ function updateAccountButton() {
 
 updateAccountButton();
 
+
 socket.on('sessionRestore', (data) => {
     if (data.user) {
         localStorage.setItem('currentUser', JSON.stringify(data.user));
@@ -174,6 +176,7 @@ socket.on('deleteResponse', (res) => {
     if (res.success) {
         localStorage.removeItem('currentUser');
         alert("Account permanently deleted from database.");
+        
         window.location.reload(); 
     } else {
         alert("Error deleting account: " + res.message);
