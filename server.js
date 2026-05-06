@@ -15,6 +15,8 @@ const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+// 1. Database Connection - Targeting "Non_e"
+// 1. Database Connection
 const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI);
@@ -22,11 +24,13 @@ const connectDB = async () => {
     } catch (err) {
         console.error("❌ CRITICAL: Database connection failed!");
         console.error(err.message);
+        // Instead of crashing the whole server, we log it.
+        // Or, if you want it to stop, use process.exit(1);
     }
 };
 
 connectDB();
-
+// 2. Database Models (These will automatically create collections in Non_e)
 const User = mongoose.model('User', new mongoose.Schema({
     name: String,
     email: { type: String, unique: true },
@@ -51,6 +55,8 @@ const Message = mongoose.model('Message', new mongoose.Schema({
     }
 }));
 
+
+// 3. Socket & Session Setup
 const io = socketIo(server, {
     cors: {
         origin: "https://none-mauve.vercel.app",
@@ -59,13 +65,14 @@ const io = socketIo(server, {
     }
 });
 
+// FIX: Initializing MongoStore correctly for v4+
 const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET || 'secret-chat-key',
     resave: false,
     saveUninitialized: true,
     store: MongoStore.create({
         mongoUrl: process.env.MONGO_URI,
-        collectionName: 'sessions' 
+        collectionName: 'sessions' // This stores login sessions in your Non_e DB
     }),
     cookie: { 
         secure: NODE_ENV === 'production', 
@@ -79,8 +86,10 @@ app.set('trust proxy', 1);
 app.use(sessionMiddleware);
 app.use(express.static(path.join(__dirname, 'Public')));
 
+// Share session with Socket.io
 io.use(sharedsession(sessionMiddleware, { autoSave: true }));
 
+// 4. Helper Logic
 const getVisibleRooms = async (user) => {
     if (!user) return [];
     const roomsWithMessage = await Message.distinct('roomName', { sender: user.name });
@@ -92,6 +101,7 @@ const getVisibleRooms = async (user) => {
     });
 };
 
+// 5. Socket Logic
 io.on('connection', (socket) => {
     const session = socket.handshake.session;
 
@@ -155,7 +165,7 @@ io.on('connection', (socket) => {
             });
 
             socket.emit('room-created-success', newRoom);
-
+            // Refresh rooms for the creator
             const rooms = await getVisibleRooms(session.user);
             socket.emit('initRooms', rooms);
         } catch (e) {
@@ -168,21 +178,6 @@ io.on('connection', (socket) => {
         socket.join(roomName);
         const history = await Message.find({ roomName }).sort({ timestamp: 1 }).limit(100);
         socket.emit('chatHistory', history); 
-        socket.to(roomName).emit('notification', {
-            message: `${userName} has joined the room!`,
-            type: 'join'
-        });
-
-        console.log(`${userName} joined room: ${roomName}`);
-    });
-
-    socket.on('disconnecting', () => {
-        socket.rooms.forEach(room => {
-            socket.to(room).emit('notification', {
-                message: "A user has left the chat.",
-                type: 'leave'
-            });
-        });
     });
 
     socket.on('newMessage', async (data) => {
@@ -226,14 +221,15 @@ io.on('connection', (socket) => {
     socket.on('updateProfileRequest', async (data) => {
         try {
             const { userId, newName } = data;
-
+            // 1. Update the document in MongoDB Atlas
             const updatedUser = await db.collection('users').findOneAndUpdate(
                 { _id: userId },          
                 { $set: { name: newName } },
-                { returnDocument: 'after' } 
+                { returnDocument: 'after' } // Returns the updated object
             );
 
             if (updatedUser) {
+                // 2. Send success back to the client
                 socket.emit('updateProfileResponse', {
                     success: true,
                     user: updatedUser
@@ -246,31 +242,34 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('deleteAccount', async (data) => {
-        try {
-            const { email } = data;
+    // On your Server (index.js or server.js)
+socket.on('deleteAccount', async (data) => {
+    try {
+        const { email } = data;
 
-            const result = await User.findOneAndDelete({ email: email });
+        // Perform the deletion in MongoDB
+        // Assuming your Mongoose model is named 'User'
+        const result = await User.findOneAndDelete({ email: email });
 
-            if (result) {
-                socket.emit('deleteResponse', { 
-                    success: true, 
-                    message: "User deleted from MongoDB" 
-                });
-            } else {
-                socket.emit('deleteResponse', { 
-                    success: false, 
-                    message: "User not found in database" 
-                });
-            }
-        } catch (err) {
-            console.error("Deletion Error:", err);
+        if (result) {
+            socket.emit('deleteResponse', { 
+                success: true, 
+                message: "User deleted from MongoDB" 
+            });
+        } else {
             socket.emit('deleteResponse', { 
                 success: false, 
-                message: "Server error during deletion" 
+                message: "User not found in database" 
             });
         }
-    });
+    } catch (err) {
+        console.error("Deletion Error:", err);
+        socket.emit('deleteResponse', { 
+            success: false, 
+            message: "Server error during deletion" 
+        });
+    }
+});
 });
 
 server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
