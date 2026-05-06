@@ -98,10 +98,6 @@ function displaySingleMessage(data) {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-function joinChat(roomName, userName) {
-    socket.emit('joinRoom', { roomName, userName });
-}
-
 function updateRoomSidebar(room) {
     if (document.querySelector(`[data-id="${room.id}"]`)) return;
 
@@ -167,18 +163,6 @@ socket.on('roomDeleted', (roomId) => {
     }
     const btn = document.querySelector(`[data-id="${roomId}"]`);
     if (btn) btn.remove();
-});
-
-socket.on('notification', (data) => {
-    const chatWindow = document.getElementById('chat-messages'); 
-    
-    const noticeElement = document.createElement('div');
-    noticeElement.className = "system-notification"; 
-    noticeElement.textContent = data.message;
-    
-    chatWindow.appendChild(noticeElement);
-    
-    chatWindow.scrollTop = chatWindow.scrollHeight;
 });
 
 socket.on('logoutConfirm', () => {
