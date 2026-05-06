@@ -425,6 +425,12 @@ body.dark-mode .dropdown-item:active {
     font-size: 25px;
 }
 
+#dismes{
+    font-size:56px;
+    text-align:center;
+    color:wine;
+}
+
 .chatroom .header .logo {
     font-weight: 600;
     font-size: 16px;
