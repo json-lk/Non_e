@@ -390,6 +390,14 @@ body.dark-mode .dropdown-item:active {
     top: 2%;
 }
 
+.system-notification {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #64748b; /* Slate gray */
+    margin: 10px 0;
+    font-style: italic;
+}
+
 .chatroom .header{
     display: flex;
     align-items: center;
