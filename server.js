@@ -48,6 +48,17 @@ const Message = mongoose.model('Message', new mongoose.Schema({
     roomName: String,
     message: String,
     sender: String,
+    timestamp: { 
+        type: Date, 
+        default: Date.now, 
+        expires: 86400 
+    }
+}));
+
+const Message = mongoose.model('Message', new mongoose.Schema({
+    roomName: String,
+    message: String,
+    sender: String,
     timestamp: { type: Date, default: Date.now }
 }));
 
