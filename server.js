@@ -179,7 +179,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnecting', () => {
-        // Rooms the user was in before disconnecting
         socket.rooms.forEach(room => {
             socket.to(room).emit('notification', {
                 message: "A user has left the chat.",
